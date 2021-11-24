@@ -1,0 +1,59 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    text-align: center;
+    background-color:#160F30;
+    font-family: "Bebas Neue", sans-serif;
+    color: white;
+}
+
+.razz-avatar {
+    border-radius: 50%;
+    height: 128px;
+    width: 128px;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+}
+
+.username {
+    letter-spacing: .05em;
+}
+
+.discrim {
+    font-size: .6em;
+}
+
+.plugs a {
+    margin-right: 9px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.7em;
+    z-index: 9000;
+}
+
+.plugs a:hover {
+    color: violet;
+}
+
+#btn {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+#audio {
+    display: none;
+}

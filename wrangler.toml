@@ -1,0 +1,11 @@
+name = "razzhost"
+type = "javascript"
+compatibility_date = "2021-11-24"
+
+workers_dev = true
+
+[build]
+command = "yarn run build"
+
+[build.upload]
+format = "service-worker"

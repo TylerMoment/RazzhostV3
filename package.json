@@ -1,0 +1,26 @@
+{
+  "name": "razzhostv3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/worker.js",
+  "scripts": {
+    "build:dev": "DEV_MODE=true rollup -c",
+    "build:prod": "DEV_MODE='' rollup -c",
+    "build": "yarn run build:dev",
+    "watch": "wrangler dev",
+    "clean": "rm -rf dist"
+  },
+  "author": "Tyler Morrison",
+  "license": "MIT",
+  "dependencies": {
+    "itty-router": "^2.4.4",
+    "mime": "^3.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/wrangler": "^1.19.5",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "rollup": "^2.60.1",
+    "rollup-plugin-binary2base64": "^1.0.3"
+  }
+}
