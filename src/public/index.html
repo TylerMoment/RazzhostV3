@@ -1,85 +1,128 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>UnholyRazzberry</title>
-    <link href="./style.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-</head>
+    <head>
+        <title>UnholyRazzberry</title>
+        <link href="./style.css" rel="stylesheet" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+            rel="stylesheet"
+        />
+    </head>
 
-<body>
-    <div class="center">
-        <img class="razz-avatar" src="/profile.webp">
-        <h1 class="username">
-            UnholyRazzberry<span class="discrim">#8555</span>
-        </h1>
+    <body>
+        <div class="center">
+            <img class="razz-avatar" src="/profile.webp" />
+            <h1 class="username">
+                UnholyRazzberry<span class="discrim">#8555</span>
+            </h1>
 
-        <img id="egg" src="/Help_Razz.gif" style="display: none;" />
+            <img id="egg" src="/Help_Razz.gif" style="display: none" />
 
-        <p class="plugs">
-            <a href="http://discord.gg/nightcore" alt="Discord" target="_blank">
-                <i class="fab fa-discord"></i>
-            </a>
-            <a href="https://www.youtube.com/channel/UCksMwRtNoXBUUQ8fgtHtkGw" alt="YouTube" target="_blank">
-                <i class="fab fa-youtube"></i>
-            </a>
-            <a href="https://www.reddit.com/user/AnimeHeadphoneRetard" alt="Reddit" target="_blank">
-                <i class="fab fa-reddit-alien"></i>
-            </a>
-            <a href="https://steamcommunity.com/id/UnholyRazzberry" alt="Steam" target="_blank">
-                <i class="fab fa-steam"></i>
-            </a>
-            <a href="https://soundcloud.com/unholyrazzberry" alt="SoundCloud" target="_blank">
-                <i class="fab fa-soundcloud"></i>
-            </a>
-            <a href="javascript:void(0)" onclick="alert('CubisticBooch51')" alt="Xbox">
-                <i class="fab fa-xbox"></i>
-            </a>
-        </p>
-    </div>
+            <p class="plugs">
+                <a
+                    href="http://discord.gg/nightcore"
+                    alt="Discord"
+                    target="_blank"
+                >
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a
+                    href="https://www.youtube.com/channel/UCksMwRtNoXBUUQ8fgtHtkGw"
+                    alt="YouTube"
+                    target="_blank"
+                >
+                    <i class="fab fa-youtube"></i>
+                </a>
+                <a
+                    href="https://www.reddit.com/user/AnimeHeadphoneRetard"
+                    alt="Reddit"
+                    target="_blank"
+                >
+                    <i class="fab fa-reddit-alien"></i>
+                </a>
+                <a
+                    href="https://steamcommunity.com/id/UnholyRazzberry"
+                    alt="Steam"
+                    target="_blank"
+                >
+                    <i class="fab fa-steam"></i>
+                </a>
+                <a
+                    href="https://soundcloud.com/unholyrazzberry"
+                    alt="SoundCloud"
+                    target="_blank"
+                >
+                    <i class="fab fa-soundcloud"></i>
+                </a>
+                <a
+                    href="javascript:void(0)"
+                    onclick="alert('CubisticBooch51')"
+                    alt="Xbox"
+                >
+                    <i class="fab fa-xbox"></i>
+                </a>
+            </p>
+        </div>
 
-    <button id="btn"></button>
-    <div id="audio"></div>
+        <button id="btn"></button>
+        <div id="audio"></div>
+        <div class="left">
+            <img src="/tylerspin.gif" />
+        </div>
+        <script>
+            var btn = document.getElementById("btn");
+            var snd = document.getElementById("audio");
 
-    <script>
-        var btn = document.getElementById("btn");
-        var snd = document.getElementById("audio");
+            // Move the easter egg button to a random spot every time you resize the
+            // page to avoid it being off page and causing a scrollbar to appear.
+            function buttonRandom() {
+                var vw = Math.max(
+                    document.documentElement.clientWidth || 0,
+                    window.innerWidth || 0
+                );
+                var vh = Math.max(
+                    document.documentElement.clientHeight || 0,
+                    window.innerHeight || 0
+                );
+                btn.style.top =
+                    Math.floor(Math.random() * (vh - 100) + 1) + "px";
+                btn.style.left =
+                    Math.floor(Math.random() * (vw - 100) + 1) + "px";
+            }
+            window.addEventListener("resize", buttonRandom);
+            buttonRandom();
 
-        // Move the easter egg button to a random spot every time you resize the
-        // page to avoid it being off page and causing a scrollbar to appear.
-        function buttonRandom() {
-            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-            var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-            btn.style.top = Math.floor((Math.random() * (vh - 100)) + 1) + "px";
-            btn.style.left = Math.floor((Math.random() * (vw - 100)) + 1) + "px";
-        }
-        window.addEventListener("resize", buttonRandom);
-        buttonRandom();
+            // Easter egg. :)
+            function easterEgg() {
+                document.getElementById("egg").style.display = "inline";
+            }
+            btn.addEventListener("click", easterEgg);
 
-        // Easter egg. :)
-        function easterEgg() {
-            document.getElementById("egg").style.display = "inline";
-        }
-        btn.addEventListener("click", easterEgg);
+            // Vine boom sound effect handlers. Adds a new audio element on each
+            // click, and there"s a interval function that removes them.
+            document.onclick = function () {
+                var el = document.createElement("audio");
+                el.src = "vine-boom.mp3";
+                snd.appendChild(el);
 
-        // Vine boom sound effect handlers. Adds a new audio element on each
-        // click, and there"s a interval function that removes them.
-        document.onclick = function() {
-            var el = document.createElement("audio");
-            el.src = "vine-boom.mp3";
-            snd.appendChild(el);
-
-            el.play();
-        }
-        setInterval(function() {
-            snd.childNodes.forEach(function(el) {
-                if (el.paused) {
-                    snd.removeChild(el);
-                }
-            });
-        }, 1000);
-    </script>
-</body>
+                el.play();
+            };
+            setInterval(function () {
+                snd.childNodes.forEach(function (el) {
+                    if (el.paused) {
+                        snd.removeChild(el);
+                    }
+                });
+            }, 1000);
+        </script>
+    </body>
 </html>

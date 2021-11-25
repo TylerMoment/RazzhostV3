@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <title>Your Files</title>
+
+        <link
+            href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/darkly/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-w+yWASP3zYNxxvwoQBD5fUSc1tctKq4KUiZzxgkBSJACiUp+IbweVKvsEhMI+gz7"
+            crossorigin="anonymous"
+        />
+
+        <style>
+            .global-actions {
+                display: flex;
+                align-items: center;
+                justify-content: end;
+            }
+            .global-actions button {
+                margin-left: 16px;
+            }
+
+            .card {
+                text-align: center;
+            }
+            .card-title {
+                width: 0;
+                min-width: 100%;
+                margin-top: 10px;
+                margin-bottom: 15px;
+            }
+            .card-title a {
+                color: white;
+            }
+            .card-body {
+                padding-top: 0;
+            }
+
+            .thumb-box {
+                width: 100%;
+                max-height: 200px;
+                padding-top: 100%;
+                position: relative;
+            }
+            .thumb-box-inner {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+            .thumb-box-inner p,
+            .thumb-box-inner img {
+                max-width: 100%;
+            }
+            .thumb-box-inner p {
+                margin: 0;
+                padding: 0 10px;
+            }
+
+            .text-tiny {
+                font-size: 0.65em;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="content" class="container" style="visibility: hidden">
+            <div class="row my-5">
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <h1 class="mb-0">Your Files</h1>
+                </div>
+
+                <div
+                    class="
+                        col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6
+                        global-actions
+                    "
+                >
+                    <button id="show-upload" class="btn btn-success">
+                        Upload File
+                    </button>
+                    <button id="delete-file" class="btn btn-danger">
+                        Delete File
+                    </button>
+                    <button id="logout" class="btn btn-info">Logout</button>
+                </div>
+            </div>
+
+            <div id="files" class="row"></div>
+            <div id="actions">
+                <span id="loading">Loading files...</span>
+            </div>
+
+            <div
+                id="upload-modal"
+                class="modal fade"
+                tabindex="-1"
+                aria-labelledby="upload-model-label"
+                aria-modal="true"
+                role="dialog"
+            >
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="upload-modal-label" class="modal-title">
+                                Upload File
+                            </h5>
+                            <button
+                                id="modal-close"
+                                type="button"
+                                class="close"
+                                aria-label="Close"
+                                onclick="closeUploadModal()"
+                            >
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="upload-form" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label for="upload-name">File name</label>
+                                    <input
+                                        id="upload-name"
+                                        type="text"
+                                        class="form-control"
+                                        aria-describedby="upload-name-help"
+                                        placeholder="file.png"
+                                        pattern="[a-z0-9_.-]{0,64}"
+                                    />
+                                    <div class="invalid-feedback">
+                                        Must only contain alphanumeric
+                                        characters, underscores, dashes and
+                                        periods. The total length must not
+                                        exceed 64 characters.
+                                    </div>
+                                    <small
+                                        id="upload-name-help"
+                                        class="form-text text-muted"
+                                    >
+                                        Leave blank for a randomly generated
+                                        filename.
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="upload-mime"
+                                        >File mime-type</label
+                                    >
+                                    <input
+                                        id="upload-mime"
+                                        type="text"
+                                        class="form-control"
+                                        aria-describedby="upload-mime-help"
+                                        placeholder="image/png"
+                                        pattern="[^\/;]+\/[^\/;]+(; *[^;\/=]+=[^;\/=]+)*"
+                                        maxlength="64"
+                                    />
+                                    <div class="invalid-feedback">
+                                        Must be a valid mime-type, and the total
+                                        length must not exceed 64 characters.
+                                    </div>
+                                    <small
+                                        id="upload-mime-help"
+                                        class="form-text text-muted"
+                                    >
+                                        Leave blank to guess the mime-type based
+                                        on the the filename.
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="upload-expiry"
+                                        >File expiry</label
+                                    >
+                                    <div class="input-group">
+                                        <input
+                                            id="upload-expiry"
+                                            type="text"
+                                            class="form-control"
+                                            aria-describedby="upload-expiry-help"
+                                            pattern="[0-9]*"
+                                        />
+                                        <div class="input-group-append">
+                                            <span
+                                                class="input-group-text"
+                                                id="basic-addon2"
+                                                >seconds</span
+                                            >
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Must only contain numbers.
+                                        </div>
+                                    </div>
+                                    <small
+                                        id="upload-expiry-help"
+                                        class="form-text text-muted"
+                                    >
+                                        Leave blank to use the default expiry
+                                        for uploads. Set to 0 to never expire.
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="upload-file"
+                                        >File
+                                        <span class="text-danger"
+                                            >*</span
+                                        ></label
+                                    >
+                                    <input
+                                        id="upload-file"
+                                        type="file"
+                                        class="form-control-file"
+                                        required="true"
+                                    />
+                                    <div class="invalid-feedback">
+                                        File is required.
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button
+                                id="modal-cancel"
+                                type="button"
+                                class="btn btn-secondary"
+                                onclick="closeUploadModal()"
+                            >
+                                Close
+                            </button>
+                            <button
+                                id="modal-upload"
+                                type="button"
+                                class="btn btn-primary"
+                                onclick="submitUploadModal()"
+                            >
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                id="modal-backdrop"
+                class="modal-backdrop fade show"
+                style="display: none"
+            ></div>
+        </div>
+
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+            integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+            integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <script id="files-template" type="text/x-handlebars-template">
+            {{#each keys}}
+                <div
+                    id="file-{{this.name}}"
+                    class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"
+                    style="margin-bottom: 30px;"
+                >
+                    <div class="card">
+                        <a
+                            href="/{{fileURL this}}"
+                            target="_blank"
+                            title="File ({{this.metadata.mime}})"
+                        >
+                            <div class="thumb-box">
+                                <div class="thumb-box-inner">
+                                    {{#if (canThumbnail this.metadata.mime)}}
+                                        <img
+                                            src="/{{fileURL this}}"
+                                            alt="Thumbnail"
+                                        />
+                                    {{else}}
+                                        <p>No thumbnail</p>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </a>
+
+                        <div class="card-title">
+                            <a href="/{{fileURL this}}" target="_blank">
+                                {{fileURL this}}
+                            </a>
+                            <p class="text-tiny mb-0">{{this.metadata.mime}}</p>
+
+                            {{#if this.metadata.created_at}}
+                                <p class="text-tiny mb-0">Created
+                                    {{localDate this.metadata.created_at}}</p>
+                            {{/if}}
+                            <p class="text-tiny mb-0">
+                                {{#if this.expiration}}
+                                    Expires
+                                    {{humanExpiration this.expiration}}
+                                {{else}}
+                                    Never expires
+                                {{/if}}
+                            </p>
+                        </div>
+
+                        <div class="card-body">
+                            <button
+                                class="btn btn-danger btn-sm"
+                                type="submit"
+                                onclick="deleteFileCard('{{this.name}}')"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </script>
+
+        <script>
+            (function () {
+                const THUMBNAIL_TYPES = [
+                    "image/gif",
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                ];
+                const LOCALSTORAGE_AUTH_KEY = "authKey";
+
+                const contentCtr = document.getElementById("content");
+                const globalDeleteBtn = document.getElementById("delete-file");
+                const uploadBtn = document.getElementById("show-upload");
+                const logoutBtn = document.getElementById("logout");
+                const filesCtr = document.getElementById("files");
+                const actionsCtr = document.getElementById("actions");
+                const uploadModal = document.getElementById("upload-modal");
+                const uploadForm = document.getElementById("upload-form");
+                const uploadName = document.getElementById("upload-name");
+                const uploadMime = document.getElementById("upload-mime");
+                const uploadExpiry = document.getElementById("upload-expiry");
+                const uploadFile = document.getElementById("upload-file");
+                const modalCloseBtn = document.getElementById("modal-close");
+                const modalCancelBtn = document.getElementById("modal-cancel");
+                const modalUploadBtn = document.getElementById("modal-upload");
+                const modalBackdrop = document.getElementById("modal-backdrop");
+
+                // Initialize handlebars.
+                const filesTpl = Handlebars.compile(
+                    document.getElementById("files-template").innerHTML
+                );
+                Handlebars.registerHelper("canThumbnail", function (value) {
+                    const mime = value.split(";")[0].trim().toLowerCase();
+                    return THUMBNAIL_TYPES.indexOf(mime) >= 0;
+                });
+                Handlebars.registerHelper("fileURL", function (file) {
+                    return `${
+                        file.name
+                    }${file.metadata.ext ? "." + file.metadata.ext : ""}`;
+                });
+                Handlebars.registerHelper("localDate", function (dateUnix) {
+                    return moment.unix(dateUnix).format("YYYY-MM-DD HH:mm:ss");
+                });
+                Handlebars.registerHelper(
+                    "humanExpiration",
+                    function (expiryUnix) {
+                        return moment.unix(expiryUnix).fromNow();
+                    }
+                );
+
+                // Storing the key in localStorage is safe and won't risk CSRF
+                // attacks since external sites can't read localStorage.
+                let authKey = localStorage.getItem(LOCALSTORAGE_AUTH_KEY);
+                if (!authKey) {
+                    authKey = prompt("Enter your key to view the dashboard:");
+                    if (!authKey) {
+                        alert(
+                            "You must enter your auth key to proceed to the dashboard. Refresh to try again."
+                        );
+                        return;
+                    }
+                    authKey = authKey.trim();
+                    localStorage.setItem(LOCALSTORAGE_AUTH_KEY, authKey);
+                }
+                contentCtr.style.visibility = "visible";
+
+                // loadFiles fetches a list of files at the given cursor and returns
+                // the parsed response. The cursor is optional.
+                async function loadFiles(cursor) {
+                    const params = new URLSearchParams("?limit=100");
+                    if (cursor) {
+                        params.set("cursor", cursor);
+                    }
+
+                    const res = await fetch(
+                        `/dashboard/list?${params.toString()}`,
+                        {
+                            headers: {
+                                Authorization: authKey,
+                            },
+                        }
+                    );
+                    if (res.status !== 200) {
+                        alert(`Invalid response ${
+                            res.status
+                        } (expected 200) from API, are you sure you put in the correct key?:
+
+${await res.text()}`);
+                        return;
+                    }
+                    return await res.json();
+                }
+
+                // renderItems renders the given file keys to the page.
+                function renderItems(keys) {
+                    const rendered = filesTpl({ keys });
+                    filesCtr.innerHTML += rendered;
+                }
+
+                // loadMore handles the entire loading and rendering flow.
+                async function loadMore(cursor) {
+                    actionsCtr.innerHTML = "";
+
+                    // Add "Loading files..." text.
+                    const loadingText = document.createElement("span");
+                    loadingText.id = "loading";
+                    loadingText.innerText = "Loading files...";
+                    actionsCtr.appendChild(loadingText);
+
+                    // Fetch files with the given cursor.
+                    const data = await loadFiles(cursor);
+
+                    // Remove "Loading files..." text.
+                    actionsCtr.innerHTML = "";
+
+                    // Render files.
+                    renderItems(data.keys);
+
+                    // Add "Load more" button if there's more data.
+                    if (!data.list_complete) {
+                        const loadMoreBtn = document.createElement("button");
+                        loadMoreBtn.id = "load-more";
+                        loadMoreBtn.innerText = "Load more";
+                        loadMoreBtn.addEventListener("click", function () {
+                            loadMore(data.cursor);
+                        });
+                        actionsCtr.appendChild(loadMoreBtn);
+                    }
+                }
+                loadMore();
+
+                // deleteFile makes the API call to delete the given file and
+                // handles any errors. Returns true if the file was successfully
+                // deleted.
+                async function deleteFile(key) {
+                    const params = new URLSearchParams("?limit=100");
+                    params.set("key", key);
+                    const res = await fetch(
+                        `/dashboard/delete?${params.toString()}`,
+                        {
+                            method: "DELETE",
+                            headers: {
+                                Authorization: authKey,
+                            },
+                        }
+                    );
+                    if (res.status !== 204) {
+                        alert(`Invalid response ${
+                            res.status
+                        } (expected 204) from API, file may not have been deleted:
+
+${await res.text()}`);
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                // deletePrompt prompts the user for a file they wish to delete so
+                // they don't have to look for it on the page.
+                async function deletePrompt() {
+                    globalDeleteBtn.disabled = true;
+                    const raw = prompt(
+                        "Enter the URL to the file you wish to delete:"
+                    );
+                    if (!raw) {
+                        globalDeleteBtn.disabled = false;
+                        return;
+                    }
+                    const key = getFileKey(raw);
+
+                    const file = document.getElementById(`file-${key}`);
+                    if (file) {
+                        // Handle it the visual way.
+                        globalDeleteBtn.disabled = false;
+                        deleteFileCard(key);
+                        return;
+                    }
+
+                    if (!confirm(`Are you sure you want to delete "${key}"?`)) {
+                        globalDeleteBtn.disabled = false;
+                        return;
+                    }
+                    if (await deleteFile(key)) {
+                        alert("File deleted");
+                    }
+                    globalDeleteBtn.disabled = false;
+                }
+                globalDeleteBtn.addEventListener("click", deletePrompt);
+
+                // deleteFileCard deletes the file with the given key and handles
+                // the loading and success states on the given card.
+                async function deleteFileCard(key) {
+                    const file = document.getElementById(`file-${key}`);
+                    if (!file) {
+                        alert(`Could not find file element for key "${key}"`);
+                        return;
+                    }
+                    const deleteBtn = file.querySelector("button");
+                    if (!deleteBtn) {
+                        alert(
+                            `Could not find delete button element for key "${key}"`
+                        );
+                        return;
+                    }
+
+                    if (!confirm(`Are you sure you want to delete "${key}"?`)) {
+                        return;
+                    }
+
+                    deleteBtn.disabled = true;
+                    if (!(await deleteFile(key))) {
+                        deleteBtn.disabled = false;
+                        return;
+                    }
+
+                    // Remove the delete button.
+                    const deleteBtnParent = deleteBtn.parentElement;
+                    const deleteBtnHeight = deleteBtn.clientHeight;
+                    deleteBtnParent.removeChild(deleteBtn);
+
+                    // Add "Deleted" text.
+                    const deletedText = document.createElement("span");
+                    deletedText.innerText = "Deleted";
+                    deletedText.className = "text-danger";
+                    deletedText.style.height = deleteBtnHeight + "px"; // avoid view shifts
+                    deletedText.style.display = "inline-block";
+                    deleteBtnParent.appendChild(deletedText);
+                }
+                window.deleteFileCard = deleteFileCard;
+
+                // Upload file modal logic.
+                function lockForm() {
+                    uploadName.disabled = true;
+                    uploadMime.disabled = true;
+                    uploadExpiry.disabled = true;
+                    uploadFile.disabled = true;
+                    modalCloseBtn.disabled = true;
+                    modalCancelBtn.disabled = true;
+                    modalUploadBtn.disabled = true;
+                }
+                function unlockForm() {
+                    uploadName.disabled = false;
+                    uploadMime.disabled = false;
+                    uploadExpiry.disabled = false;
+                    uploadFile.disabled = false;
+                    modalCloseBtn.disabled = false;
+                    modalCancelBtn.disabled = false;
+                    modalUploadBtn.disabled = false;
+                }
+                function showUploadModal() {
+                    uploadName.value = "";
+                    uploadMime.value = "";
+                    uploadExpiry.value = "";
+                    uploadFile.value = "";
+                    unlockForm();
+                    modalBackdrop.style.display = "block";
+                    uploadModal.style.display = "block";
+                    uploadModal.classList.add("show");
+                }
+                function closeUploadModal() {
+                    modalBackdrop.style.display = "none";
+                    uploadModal.style.display = "none";
+                    uploadModal.classList.remove("show");
+                }
+                async function submitUploadModal() {
+                    lockForm();
+                    if (!uploadForm.checkValidity()) {
+                        unlockForm();
+                        uploadForm.classList.add("was-validated");
+                        return;
+                    }
+                    console.log(uploadFile);
+                    if (uploadFile.files.length === 0) {
+                        alert("File is required.");
+                        unlockForm();
+                        return;
+                    }
+
+                    // Get the form input values.
+                    const name =
+                            uploadName.value.trim() || uploadFile.files[0].name,
+                        mime = uploadMime.value.trim(),
+                        expiry =
+                            uploadExpiry.value.trim() === ""
+                                ? -1
+                                : parseInt(uploadExpiry.value.trim());
+
+                    // Extra field validation.
+                    if (expiry === NaN) {
+                        alert("Expiry field is not a number.");
+                        unlockForm();
+                        return;
+                    }
+                    if (expiry > 0 && expiry < 60) {
+                        alert(
+                            "Expiry field must not be between 1 and 59 seconds inclusive."
+                        );
+                        unlockForm();
+                        return;
+                    }
+                    if (expiry > 31536000) {
+                        // 1 year
+                        alert("Expiry field must not exceed 1 year.");
+                        unlockForm();
+                        return;
+                    }
+
+                    const headers = {
+                        Authorization: authKey,
+                        "Content-Type": mime,
+                        "X-File-Name": name,
+                        "X-Expiry-Seconds": expiry.toString(),
+                    };
+                    if (uploadName.value) {
+                        headers["X-Force-Name"] = uploadName.value.trim();
+                    }
+
+                    const res = await fetch("/upload", {
+                        method: "POST",
+                        body: uploadFile.files[0],
+                        headers,
+                    });
+                    if (res.status !== 200) {
+                        alert(`Invalid response ${
+                            res.status
+                        } (expected 200) from API, file may not have been uploaded:
+
+${await res.text()}`);
+                        unlockForm();
+                        return false;
+                    }
+
+                    const data = await res.json();
+                    if (!data || !data.url) {
+                        alert(`Invalid response data from API, expected JSON with "url" field:
+
+${await res.text()}`);
+                        unlockForm();
+                        return;
+                    }
+
+                    // Prepend a new file card with the data.
+                    const keys = [
+                        {
+                            name: data.name,
+                            expiration: data.expiration,
+                            metadata: {
+                                mime: data.metadata.mime,
+                                ext: data.metadata.ext,
+                                created_at: data.metadata.created_at,
+                            },
+                        },
+                    ];
+                    filesCtr.innerHTML =
+                        filesTpl({ keys }) + filesCtr.innerHTML;
+                    unlockForm();
+                    closeUploadModal();
+                }
+                uploadBtn.addEventListener("click", showUploadModal);
+                window.closeUploadModal = closeUploadModal;
+                window.submitUploadModal = submitUploadModal;
+
+                // Logout button handler.
+                function logout() {
+                    if (!confirm("Are you sure you wish to logout?")) {
+                        return;
+                    }
+                    localStorage.setItem(LOCALSTORAGE_AUTH_KEY, "");
+                    location.reload();
+                }
+                logoutBtn.addEventListener("click", logout);
+
+                // Utilities.
+                function getFileName(path) {
+                    const pathSplit = path.trim().split(/[\/\\]/);
+                    return pathSplit[pathSplit.length - 1];
+                }
+                function getFileKey(path) {
+                    const fileSplit = getFileName(path).split(".");
+                    return fileSplit[0].trim();
+                }
+                function zeroPad(n, width) {
+                    width = width || 2;
+                    n = n + "";
+                    return n.length >= width
+                        ? n
+                        : new Array(width - n.length + 1).join("0") + n;
+                }
+            })();
+        </script>
+    </body>
+</html>

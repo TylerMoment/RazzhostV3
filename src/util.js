@@ -1,8 +1,10 @@
-import mime from "mime";
+import mime from "mime/lite";
 
-import { generateRandomString } from './rand';
+import { generateRandomString } from "./rand";
 
-const BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+const BASE56_ALPHABET =
+    "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+const DEFAULT_MIME_TYPE = "application/octet-stream";
 
 export function respond(status, msg) {
     return new Response(msg, {
@@ -33,9 +35,11 @@ export function fileExt(path, mimeType) {
     if (path) {
         const pathSplit = path.split("/");
         const nameSplit = pathSplit[pathSplit.length - 1].split(".");
-        const ext = nameSplit[nameSplit.length - 1].toLowerCase();
-        if (ext) {
-            return ext;
+        if (nameSplit.length > 1) {
+            const ext = nameSplit[nameSplit.length - 1].trim().toLowerCase();
+            if (ext) {
+                return ext;
+            }
         }
     }
 
@@ -47,6 +51,19 @@ export function fileExt(path, mimeType) {
     }
 
     return "";
+}
+
+export function guessMimeType(ext) {
+    if (ext === "") {
+        return DEFAULT_MIME_TYPE;
+    }
+
+    const m = mime.getType(ext);
+    if (m) {
+        return m;
+    }
+
+    return DEFAULT_MIME_TYPE;
 }
 
 // fileName returns the filename minus the extension.

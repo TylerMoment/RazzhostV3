@@ -1,11 +1,12 @@
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
 }
 
 body {
     text-align: center;
-    background-color:#160F30;
+    background-color: #160f30;
     font-family: "Bebas Neue", sans-serif;
     color: white;
 }
@@ -26,11 +27,11 @@ body {
 }
 
 .username {
-    letter-spacing: .05em;
+    letter-spacing: 0.05em;
 }
 
 .discrim {
-    font-size: .6em;
+    font-size: 0.6em;
 }
 
 .plugs a {
@@ -45,6 +46,17 @@ body {
     color: violet;
 }
 
+.left {
+    padding-top: calc(250px - 128px);
+    position: fixed;
+    bottom: -150px;
+    left: 80px;
+    transition: bottom 1.5s ease 0s;
+}
+
+.left:hover {
+    bottom: -25px;
+}
 #btn {
     position: absolute;
     height: 100px;

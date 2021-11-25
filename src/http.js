@@ -4,12 +4,13 @@ import { files, serveStatic } from "./public/static";
 import {
     fileExt,
     fileName,
+    guessMimeType,
     randomID,
     requireAuthentication,
-    respond
+    respond,
 } from "./util";
 
-const expirationTtl = DEFAULT_EXPIRATION * 7 * 24 * 60 * 60; // convert from weeks to seconds
+const defaultExpirationTtl = DEFAULT_EXPIRATION * 7 * 24 * 60 * 60; // convert from weeks to seconds
 const router = Router();
 
 // rewrites contains any in-process URL rewrites. The client is not redirected.
@@ -25,6 +26,13 @@ const globalHeaders = {
     "Access-Control-Max-Age": "86400",
 };
 
+// noCacheHeaders are applied to responses that should not be cached.
+const noCacheHeaders = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+};
+
 // profile.webp redirects to Razz's current Discord avatar. The avatar URL is
 // cached in KV.
 router.get("/profile.webp", async (req) => {
@@ -32,12 +40,15 @@ router.get("/profile.webp", async (req) => {
 
     let url = await db.get(profileKey);
     if (!url) {
-        const discordReq= new Request(`https://discord.com/api/v9/users/${DISCORD_USER_ID}`, {
-            headers: {
-                "Authorization": `Bot ${DISCORD_TOKEN}`,
-            },
-            method: "GET",
-        });
+        const discordReq = new Request(
+            `https://discord.com/api/v9/users/${DISCORD_USER_ID}`,
+            {
+                headers: {
+                    Authorization: `Bot ${DISCORD_TOKEN}`,
+                },
+                method: "GET",
+            }
+        );
 
         const res = await fetch(discordReq);
         const body = await res.text();
@@ -48,6 +59,7 @@ router.get("/profile.webp", async (req) => {
             metadata: {
                 mime: "text/plain",
                 ext: "webp",
+                created_at: Math.round(new Date().getTime() / 1000),
             },
             expirationTtl: 10 * 60, // 10 minutes
         });
@@ -56,12 +68,12 @@ router.get("/profile.webp", async (req) => {
     return new Response(null, {
         status: 302,
         headers: {
-            "Location": url,
+            Location: url,
         },
     });
 });
 
-router.get("/manifest",  async (req) => {
+router.get("/manifest", async (req) => {
     const manifest = {
         Version: "1.0.0",
         Name: `RazzhostV3 Uploader`,
@@ -69,8 +81,8 @@ router.get("/manifest",  async (req) => {
         RequestMethod: "POST",
         RequestURL: `https://${req.xurl.hostname}/upload`,
         Headers: {
-          "Authorization": "INSERT_AUTH_KEY_HERE",
-          "X-File-Name": "$filename$",
+            Authorization: "INSERT_AUTH_KEY_HERE",
+            "X-File-Name": "$filename$",
         },
         Body: "Binary",
         URL: "$json:url$",
@@ -83,27 +95,64 @@ router.get("/manifest",  async (req) => {
             "Content-Type": "application/json",
         },
     });
-}),
+});
 
 router.post("/upload", requireAuthentication, async (req) => {
-    const
-        id = randomID(),
-        mime = req.headers.get("Content-Type"),
-        name = req.headers.get("X-File-Name"),
-        ext = fileExt(name, mime);
+    const name = req.headers.get("X-File-Name"),
+        forceName = req.headers.get("X-Force-Name"),
+        customExpiry = parseInt(req.headers.get("X-Expiry-Seconds"));
 
+    // Process forced filename.
+    let id = randomID(),
+        mime = req.headers.get("Content-Type"),
+        ext = fileExt(name, mime);
+    if (forceName) {
+        id = fileName(forceName);
+        ext = fileExt(forceName, mime);
+    }
+
+    // Guess mime-type.
+    if (!mime) {
+        mime = guessMimeType(ext);
+    }
+
+    let expirationTtl = defaultExpirationTtl;
+    if (customExpiry < 0) {
+        // Negative is default.
+        expirationTtl = defaultExpirationTtl;
+    } else if (customExpiry === 0) {
+        // 0 is never.
+        expirationTtl = undefined;
+    } else if (customExpiry !== NaN) {
+        // Positive values are a custom value.
+        expirationTtl = customExpiry;
+    }
+    if (expirationTtl < 60) {
+        // CloudFlare's minimum TTL is 60 seconds.
+        expirationTtl = 60;
+    }
+
+    const metadata = {
+        mime,
+        ext,
+        created_at: Math.round(new Date().getTime() / 1000),
+    };
     await db.put(id, req.body, {
-        metadata: {
-            mime,
-            ext
-        },
+        metadata,
         expirationTtl,
     });
 
-    return new Response(`{"url":"https://${req.xurl.hostname}/${id}.${ext}"}`, {
+    const res = {
+        url: `https://${req.xurl.hostname}/${id}${ext ? "." + ext : ""}`,
+        name: id,
+        expiration: metadata.created_at + expirationTtl,
+        metadata,
+    };
+    return new Response(JSON.stringify(res), {
         status: 200,
         headers: {
             "Content-Type": "application/json",
+            ...noCacheHeaders,
         },
     });
 });
@@ -112,29 +161,46 @@ router.get("/dashboard/list", requireAuthentication, async (req) => {
     const cursor = req.xurl.searchParams.get("cursor") || null;
     const limit = req.xurl.searchParams.get("limit") || 100;
 
-    const items = await db.list({
+    const data = await db.list({
         cursor,
-        limit
+        limit,
     });
 
-    return new Response(JSON.stringify(items), {
+    return new Response(JSON.stringify(data), {
         status: 200,
+        headers: {
+            "Content-Type": "application/json",
+            ...noCacheHeaders,
+        },
     });
 });
 
 router.delete("/dashboard/delete", requireAuthentication, async (req) => {
-    const key = req.xurl.searchParams.get("key");
+    let key = req.xurl.searchParams.get("key");
+    if (!key) {
+        return respond(
+            400,
+            '400 Bad Request: "key" query parameter is required'
+        );
+    }
+
+    key = fileName(key);
+    const file = await db.get(key, { type: "stream" });
+    if (!file) {
+        return respond(404, `404 Not Found: no file with key "${key}" exists`);
+    }
 
     await db.delete(key);
 
     return new Response(null, {
         status: 204, // No Content
+        ...noCacheHeaders,
     });
 });
 
 // 404 handler. Serves rewrites, static files and KV files.
 router.all("*", async (req) => {
-    let path = req.xurl.pathname
+    let path = req.xurl.pathname;
     if (path !== "/") {
         path = path.replace(/\/$/, "");
     }
@@ -142,7 +208,7 @@ router.all("*", async (req) => {
     // Handle rewrites.
     if (!req.rewritten && rewrites.hasOwnProperty(path)) {
         req.xurl.pathname = rewrites[path];
-        req.url = req.xurl.toString()
+        req.url = req.xurl.toString();
         req.rewritten = true;
         return router.handle(req);
     }
@@ -153,14 +219,13 @@ router.all("*", async (req) => {
     }
 
     // Serve files from KV.
-    const file = await db.getWithMetadata(fileName(path), {
-        type: "stream",
-    });
-    if (file.value) {
+    const file = await db.getWithMetadata(fileName(path), { type: "stream" });
+    if (file && file.value) {
         return new Response(file.value, {
             status: 200,
             headers: {
-                "Content-Type": file.metadata.mime || "application/octet-stream",
+                "Content-Type":
+                    file.metadata.mime || "application/octet-stream",
             },
         });
     }
@@ -177,4 +242,4 @@ export async function handleRequest(req) {
     }
 
     return res;
-};
+}

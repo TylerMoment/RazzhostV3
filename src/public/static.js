@@ -5,6 +5,7 @@ import indexHtml from "./index.html";
 import styleCss from "./style.css";
 import vineBoom from "./vine-boom.mp3";
 import razzGif from "./Help_Razz.gif";
+import tylerSpinGif from "./tylerspin.gif";
 
 // dashboard.html assets.
 import dashboardHtml from "./dashboard.html";
@@ -45,6 +46,12 @@ export const files = {
         contents: dashboardHtml,
         headers: {
             "Content-Type": "text/html; charset=UTF-8",
+        },
+    },
+    "/tylerspin.gif": {
+        contents: tylerSpinGif,
+        headers: {
+            "Content-Type": "image/gif",
         },
     },
 };
