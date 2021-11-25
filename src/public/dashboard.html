@@ -453,6 +453,7 @@ ${await res.text()}`);
                     if (!data.list_complete) {
                         const loadMoreBtn = document.createElement("button");
                         loadMoreBtn.id = "load-more";
+                        loadMoreBtn.classList = "btn btn-primary mb-5";
                         loadMoreBtn.innerText = "Load more";
                         loadMoreBtn.addEventListener("click", function () {
                             loadMore(data.cursor);

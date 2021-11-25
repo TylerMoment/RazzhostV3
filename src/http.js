@@ -123,11 +123,11 @@ router.post("/upload", requireAuthentication, async (req) => {
     } else if (customExpiry === 0) {
         // 0 is never.
         expirationTtl = undefined;
-    } else if (customExpiry !== NaN) {
+    } else if (!isNaN(customExpiry)) {
         // Positive values are a custom value.
         expirationTtl = customExpiry;
     }
-    if (expirationTtl < 60) {
+    if (expirationTtl !== undefined && expirationTtl < 60) {
         // CloudFlare's minimum TTL is 60 seconds.
         expirationTtl = 60;
     }

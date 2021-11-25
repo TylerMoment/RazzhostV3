@@ -23,6 +23,7 @@
         "@rollup/plugin-node-resolve": "^13.0.6",
         "prettier": "^2.4.1",
         "rollup": "^2.60.1",
-        "rollup-plugin-binary2base64": "^1.0.3"
+        "rollup-plugin-binary2base64": "^1.0.3",
+        "rollup-plugin-uglify": "^6.0.4"
     }
 }

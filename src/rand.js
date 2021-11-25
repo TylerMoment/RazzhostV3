@@ -1,5 +1,5 @@
 /*
-generateRandomString license:
+@license generateRandomString:
 
 MIT License
 
