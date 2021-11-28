@@ -36,7 +36,7 @@ const noCacheHeaders = {
 // profile.webp redirects to Razz's current Discord avatar. The avatar URL is
 // cached in KV.
 router.get("/profile.webp", async (req) => {
-    const profileKey = "profile";
+    const profileKey = "---profile---";
 
     let url = await db.get(profileKey);
     if (!url) {
