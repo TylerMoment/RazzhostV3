@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 html,
 body {
     margin: 0;
@@ -28,6 +32,7 @@ body {
 
 .username {
     letter-spacing: 0.05em;
+    filter:drop-shadow(2.5px 1px grey)
 }
 
 .discrim {
@@ -35,15 +40,31 @@ body {
 }
 
 .plugs a {
-    margin-right: 9px;
-    color: white;
-    text-decoration: none;
-    font-size: 1.7em;
-    z-index: 9000;
+    display: inline-block;
+    position: relative;
+    height: 50px;
+    width: 50px;
+    margin: 4px;
+    padding-top: 2px;
+    padding-left: 1px;
+    line-height: 50px;
+    border-radius: 50%; 
+    background-color: #DB8842;
+    color: #A15A20;
+    text-align: center;
+    font-size: 1.8em;
+    box-shadow: 4px 2px #9C602F;
 }
 
 .plugs a:hover {
-    color: violet;
+    color: gainsboro;
+}
+
+.plugs a:active {
+    top: 2px;
+    margin-left: 8px;
+    margin-right: 0px;
+    box-shadow: 0px 0px;
 }
 
 .left {
